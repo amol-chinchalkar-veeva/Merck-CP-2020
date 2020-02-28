@@ -128,8 +128,8 @@ public class DocumentMover implements Runnable {
 
 							logger.info("File Successfully delivered to printer:" + zipEntryFile.getName());
 
-							// house keeping: delete the print download
-							File file = new File(outDir + zipEntryFile.getName());
+							// house keeping: delete the print download; Added "\\" on 02/28/2020
+							File file = new File(outDir +"\\"+ zipEntryFile.getName());
 							if (file.exists()) {
 								file.delete();
 							}
