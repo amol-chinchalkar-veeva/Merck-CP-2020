@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+	<!--  <context:property-placeholder location="file:${user.home}/cpq_application.properties"/> -->
+
+
+	<!-- Externalize some settings to properties files -->
+	<bean id="environmentVariablesConfiguration"
+		class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+		<property name="algorithm" value="PBEWithMD5AndTripleDES" /> <!-- With JVM without export restriction use PBEWithMD5AndTripleDES otherwise 
+			PBEWithMD5AndDES, but it's not safe -->
+		<!-- when using a command line argument: <property name="passwordSysPropertyName" 
+			value="jasypt.password" /> -->
+		<property name="passwordEnvName" value="JASYPT_PASSWORD" />
+	</bean>
+
+	<bean id="jasyptStringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+		<property name="config" ref="environmentVariablesConfiguration" />
+	</bean>
+
+	<bean id="propertyConfigurer"
+		class="org.jasypt.spring31.properties.EncryptablePropertyPlaceholderConfigurer">
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<constructor-arg ref="jasyptStringEncryptor" />
+		<property name="locations">
+			<list>
+				<value>file:${user.home}/cpq_application.properties</value>
+			</list>
+		</property>
+	</bean>
+</beans>

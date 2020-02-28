@@ -1,0 +1,15 @@
+com\veeva\controlledprintqueue\JSONConfigManager.class
+com\veeva\controlledprintqueue\models\ControlCopyRequest.class
+com\veeva\controlledprintqueue\HomeController.class
+com\veeva\controlledprintqueue\print\PDFBoxPrintMode.class
+com\veeva\controlledprintqueue\Application.class
+com\veeva\controlledprintqueue\EmailUtil$1.class
+com\veeva\controlledprintqueue\SpringConfiguration.class
+com\veeva\controlledprintqueue\VQLBuilder.class
+com\veeva\controlledprintqueue\print\LPRPrintMode.class
+com\veeva\controlledprintqueue\DocumentMover.class
+com\veeva\controlledprintqueue\EmailUtil.class
+com\veeva\controlledprintqueue\models\PrintRequest.class
+com\veeva\controlledprintqueue\JSONConfigManager$1.class
+com\veeva\controlledprintqueue\models\Printer.class
+com\veeva\controlledprintqueue\FieldType.class

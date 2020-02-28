@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<!-- This file is the structural configuration of the vault client. It is 
+		used by both the application and it's JUnit test suite so should not include 
+		any run time specific parameters. These should be loaded from the property 
+		file specified in the main application context file -->
+
+	<bean id="vaultClientErrorHandler"
+		class="com.veeva.vaultclient.clients.VaultClientErrorHandler" />
+
+	<!-- Now configure the Rest template with the Vault specific components -->
+	<!-- The RestTemplate is responsible for sending the authorization header 
+		and so must be a separate instance per VaultClient. This means its scope 
+		should be prototype. The message converters and error handler are stateless 
+		so they can be singletons. The HTTP client uses pooling but this should select 
+		the connection by URL so should be safe providing each Vault API has a different 
+		URL. -->
+	<bean id="vaultSessionClient"
+		class="com.veeva.vaultclient.clients.VaultSessionClient"
+		scope="request">
+		<!-- will be filled by code: <property name="baseUri" value="${vault.url}" 
+			/> <property name="username" value="${vault.username}" /> <property name="password" 
+			value="${vault.password}" /> <property name="versionNumber" value="${vault.apiversion}" 
+			/> -->
+
+		<property name="vaultTemplate"
+			ref="vaultClientRestTemplateWithTimeout" />
+		<!-- <property name="vaultSessionClient" ref="vaultSessionClient" /> -->
+	</bean>
+
+	<!-- configure the query client -->
+	<bean id="vaultDocumentClient"
+		class="com.veeva.vaultclient.clients.VaultDocumentClient183"
+		scope="request">
+		<property name="vaultSessionClient" ref="vaultSessionClient" />
+		<property name="vaultQueryClient" ref="vaultQueryClient" />
+	</bean>
+
+	<!-- configure the query client -->
+	<bean id="vaultQueryClient"
+		class="com.veeva.vaultclient.clients.VaultQueryClient100"
+		scope="request">
+		<property name="vaultSessionClient" ref="vaultSessionClient" />
+	</bean>
+
+	<!-- configure the object client -->
+	<bean id="vaultObjectClient"
+		class="com.veeva.vaultclient.clients.VaultObjectClient173"
+		scope="request">
+		<property name="vaultSessionClient" ref="vaultSessionClient" />
+		<property name="vaultQueryClient" ref="vaultQueryClient" />
+	</bean>
+
+	<!-- configure the picklist client -->
+	<bean id="vaultPicklistClient"
+		class="com.veeva.vaultclient.clients.VaultPicklistClient"
+		scope="request">
+		<property name="vaultSessionClient" ref="vaultSessionClient" />
+	</bean>
+	<!-- configure the user client -->
+	<bean id="vaultUserClient"
+		class="com.veeva.vaultclient.clients.VaultUserClient" scope="request">
+		<property name="vaultSessionClient" ref="vaultSessionClient" />
+		<property name="vaultQueryClient" ref="vaultQueryClient" />
+		<property name="retrieveAppLicensing" value="false" />
+	</bean>
+</beans>

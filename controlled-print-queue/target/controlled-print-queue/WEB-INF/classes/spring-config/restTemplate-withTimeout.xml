@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util.xsd">
+	<bean id="requestConfigBuilder1" class="org.apache.http.client.config.RequestConfig"
+		factory-method="custom">
+	</bean>
+
+	<bean id="requestConfigBuilder2" factory-bean="requestConfigBuilder1"
+		factory-method="setSocketTimeout"> 
+		<!-- 100 minutes  -->
+		<constructor-arg value="6000000" />
+	</bean>
+
+	<bean id="requestConfigBuilder3" factory-bean="requestConfigBuilder2"
+		factory-method="setConnectTimeout">
+		<!-- 10 minutes  -->
+		<constructor-arg value="600000" />
+	</bean>
+
+	<bean id="requestConfigBuilder4" factory-bean="requestConfigBuilder3"
+		factory-method="setConnectionRequestTimeout">
+		<!-- 100 minutes  -->
+		<constructor-arg value="6000000" />
+	</bean>
+
+	<bean id="requestConfig" factory-bean="requestConfigBuilder4"
+		factory-method="build" />
+
+	<bean id="httpClientSocketConfigBuilder1" class="org.apache.http.config.SocketConfig.Builder">
+	</bean>
+
+	<bean id="httpClientSocketConfigBuilder2" factory-bean="httpClientSocketConfigBuilder1"
+		factory-method="setRcvBufSize">
+		<constructor-arg value="1048576" />
+	</bean>
+
+	<bean id="httpClientSocketConfigBuilder3" factory-bean="httpClientSocketConfigBuilder2"
+		factory-method="setSoKeepAlive">
+		<constructor-arg value="true" />
+	</bean>
+
+	<bean id="httpClientSocketConfigBuilder4" factory-bean="httpClientSocketConfigBuilder3"
+		factory-method="setSoLinger">
+		<constructor-arg value="10000" />
+	</bean>
+
+	<bean id="httpClientSocketConfigBuilder" factory-bean="httpClientSocketConfigBuilder4"
+		factory-method="setSoTimeout">
+		<!-- 100 minutes  -->
+		<constructor-arg value="6000000" />
+	</bean>
+
+	<bean id="httpClientBuilder1" class="org.apache.http.impl.client.HttpClientBuilder"
+		factory-method="create" scope="prototype">
+	</bean>
+
+	<bean id="httpClientBuilder2" factory-bean="httpClientBuilder1"
+		factory-method="disableAutomaticRetries" scope="prototype">
+	</bean>
+	<bean id="httpClientBuilder3" factory-bean="httpClientBuilder2"
+		factory-method="setDefaultRequestConfig" scope="prototype">
+		<constructor-arg ref="requestConfig" />
+	</bean>
+	<bean id='connectionPool'
+		class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager"
+		scope="prototype">
+<?comment	<bean id='connectionPool'
+		class="com.veeva.usersynchronizer.ups.UpsConnectionManager" scope="prototype"> ?>
+		<property name="maxTotal" value="100" />
+		<property name="defaultSocketConfig">
+			<bean id="httpClientSocketConfig" factory-bean="httpClientSocketConfigBuilder"
+				factory-method="build" />
+		</property>
+		<property name="validateAfterInactivity" value="50000" />
+	</bean>
+
+	<bean id="httpClientBuilder4" factory-bean="httpClientBuilder3"
+		factory-method="setConnectionManager" scope="prototype">
+		<constructor-arg>
+			<ref bean='connectionPool' />
+		</constructor-arg>
+	</bean>
+
+	<bean id="vaultClientHttpClientWithTimeout" factory-bean="httpClientBuilder4"
+		factory-method="build" scope="prototype" />
+
+	<bean id="vaultClientRestTemplateWithTimeout" class="org.springframework.web.client.RestTemplate"
+		scope="prototype">
+		<!-- You can include your own selection of message converters but the defaults 
+			are pretty good -->
+		<!-- <property name="messageConverters" ref="vaultClientMessageConvertersList" 
+			/> -->
+		<property name="errorHandler" ref="vaultClientErrorHandler" />
+		<property name="messageConverters">
+			<util:list>
+				<bean
+					class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.ResourceHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.xml.SourceHttpMessageConverter" />
+				<bean class="org.springframework.http.converter.FormHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+					<property name="objectMapper" ref="vaultClientObjectMapper" />
+				</bean>
+			</util:list>
+		</property>
+		<constructor-arg>
+			<bean
+				class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory"
+				scope="prototype">
+				<constructor-arg ref="vaultClientHttpClientWithTimeout" />
+				<property name="bufferRequestBody" value="false" />
+			</bean>
+		</constructor-arg>
+	</bean>
+</beans>
