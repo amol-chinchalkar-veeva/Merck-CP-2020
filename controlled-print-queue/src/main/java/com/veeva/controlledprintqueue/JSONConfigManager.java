@@ -232,7 +232,7 @@ public class JSONConfigManager {
 
 	/**
 	 * Processing (Setup) of the numeric text boxes when form is loaded first time
-	 * 
+	 * 03-02
 	 * @param control
 	 */
 	@SuppressWarnings("unchecked")
